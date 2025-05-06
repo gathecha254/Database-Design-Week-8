@@ -271,3 +271,145 @@ def delete_book(book_id: int):
     cursor.close()
     db.close()
     return {"message": "Book deleted"}
+
+
+# ===== LOAN ENDPOINTS =====
+@app.get("/loans", response_model=List[Loan])
+def read_loans():
+    db = database.get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Loans")
+    results = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return results
+
+@app.post("/loans", response_model=Loan)
+def create_loan(loan: LoanCreate):
+    db = database.get_db()
+    cursor = db.cursor()
+    query = """
+    INSERT INTO Loans (MemberID, BookID, DueDate) VALUES (%s, %s, %s)
+    """
+    values = (loan.member_id, loan.book_id, loan.due_date)
+    cursor.execute(query, values)
+    db.commit()
+    new_id = cursor.lastrowid
+    cursor.execute("SELECT * FROM Loans WHERE LoanID = %s", (new_id,))
+    new_loan = cursor.fetchone()
+    cursor.close()
+    db.close()
+    return {**loan.dict(), "id": new_id, "loan_date": new_loan['LoanDate'], "return_date": new_loan['ReturnDate']}
+
+@app.get("/loans/{loan_id}", response_model=Loan)
+def read_loan(loan_id: int):
+    db = database.get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Loans WHERE LoanID = %s", (loan_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    db.close()
+    if not result:
+        raise HTTPException(status_code=404, detail="Loan not found")
+    return result
+
+@app.put("/loans/{loan_id}")
+def update_loan(loan_id: int, loan: LoanCreate):
+    db = database.get_db()
+    cursor = db.cursor()
+    query = """
+    UPDATE Loans SET 
+      MemberID = %s,
+      BookID = %s,
+      DueDate = %s
+    WHERE LoanID = %s
+    """
+    values = (loan.member_id, loan.book_id, loan.due_date, loan_id)
+    cursor.execute(query, values)
+    db.commit()
+    cursor.close()
+    db.close()
+    return {"message": "Loan updated"}
+
+@app.delete("/loans/{loan_id}")
+def delete_loan(loan_id: int):
+    db = database.get_db()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM Loans WHERE LoanID = %s", (loan_id,))
+    db.commit()
+    cursor.close()
+    db.close()
+    return {"message": "Loan deleted"}
+
+
+# ===== RESERVATION ENDPOINTS =====
+@app.get("/reservations", response_model=List[Reservation])
+def read_reservations():
+    db = database.get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Reservations")
+    results = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return results
+
+@app.post("/reservations", response_model=Reservation)
+def create_reservation(reservation: ReservationCreate):
+    db = database.get_db()
+    cursor = db.cursor()
+    query = """
+    INSERT INTO Reservations (MemberID, BookID) VALUES (%s, %s)
+    """
+    values = (reservation.member_id, reservation.book_id)
+    cursor.execute(query, values)
+    db.commit()
+    new_id = cursor.lastrowid
+    cursor.execute("SELECT * FROM Reservations WHERE ReservationID = %s", (new_id,))
+    new_reservation = cursor.fetchone()
+    cursor.close()
+    db.close()
+    return {
+        **reservation.dict(),
+        "id": new_id,
+        "reservation_date": new_reservation['ReservationDate'],
+        "status": new_reservation['Status']
+    }
+
+@app.get("/reservations/{reservation_id}", response_model=Reservation)
+def read_reservation(reservation_id: int):
+    db = database.get_db()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM Reservations WHERE ReservationID = %s", (reservation_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    db.close()
+    if not result:
+        raise HTTPException(status_code=404, detail="Reservation not found")
+    return result
+
+@app.put("/reservations/{reservation_id}")
+def update_reservation(reservation_id: int, reservation: ReservationCreate):
+    db = database.get_db()
+    cursor = db.cursor()
+    query = """
+    UPDATE Reservations SET 
+      MemberID = %s,
+      BookID = %s
+    WHERE ReservationID = %s
+    """
+    values = (reservation.member_id, reservation.book_id, reservation_id)
+    cursor.execute(query, values)
+    db.commit()
+    cursor.close()
+    db.close()
+    return {"message": "Reservation updated"}
+
+@app.delete("/reservations/{reservation_id}")
+def delete_reservation(reservation_id: int):
+    db = database.get_db()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM Reservations WHERE ReservationID = %s", (reservation_id,))
+    db.commit()
+    cursor.close()
+    db.close()
+    return {"message": "Reservation deleted"}
