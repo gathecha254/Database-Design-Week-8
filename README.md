@@ -25,16 +25,27 @@ This system enables librarians and users to manage members, books, authors, cate
 ## Project Structure
 
 Databas-Design-Week-8/
+
 │
+
 ├── README.md
+
 ├── erd.png # Entity Relationship Diagram (Exported from DrawSQL)
+
 ├── library.sql # MySQL schema with DDL & sample DML
+
 │
+
 └── library-api/
+
 ├── main.py # FastAPI application with all routes
+
 ├── database.py # Database connection setup
+
 ├── models.py # Pydantic models for ORM mapping
+
 ├── schemas.py # Request/response validation schemas
+
 └── requirements.txt # Python dependencies
 
 
