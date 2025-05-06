@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 
-# Base model for Member
+# Member
 class MemberBase(BaseModel):
     name: str
     email: str
@@ -16,7 +16,7 @@ class Member(MemberBase):
         orm_mode = True
 
 
-# Base model for Author
+# Author
 class AuthorBase(BaseModel):
     first_name: str
     last_name: str
@@ -32,7 +32,7 @@ class Author(AuthorBase):
         orm_mode = True
 
 
-# Base model for Category
+# Category
 class CategoryBase(BaseModel):
     name: str
 
@@ -46,7 +46,7 @@ class Category(CategoryBase):
         orm_mode = True
 
 
-# Base model for Book
+# Book
 class BookBase(BaseModel):
     title: str
     isbn: str
@@ -59,6 +59,41 @@ class BookCreate(BookBase):
 
 class Book(BookBase):
     id: int
+
+    class Config:
+        orm_mode = True
+
+
+# Loan
+class LoanBase(BaseModel):
+    member_id: int
+    book_id: int
+    due_date: str
+
+class LoanCreate(LoanBase):
+    pass
+
+class Loan(LoanBase):
+    id: int
+    loan_date: str
+    return_date: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
+# Reservation
+class ReservationBase(BaseModel):
+    member_id: int
+    book_id: int
+
+class ReservationCreate(ReservationBase):
+    pass
+
+class Reservation(ReservationBase):
+    id: int
+    reservation_date: str
+    status: str
 
     class Config:
         orm_mode = True
